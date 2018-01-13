@@ -7,6 +7,7 @@ import crypto.bittrex.BittrexHandler;
 import crypto.cryptopia.CryptopiaHandler;
 import crypto.gdax.GdaxHandler;
 import crypto.hitbtc.HitbtcHandler;
+import crypto.kucoin.KucoinHandler;
 import crypto.tidex.TidexHandler;
 import crypto.utils.Frequency;
 import crypto.utils.TradeItem;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,6 +37,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -76,6 +79,8 @@ public class CryptoUI
     private static JLabel bittrexLabel;
     private static JLabel cryptopiaInvestment;
     private static JLabel cryptopiaLabel;
+    private static JLabel kucoinInvestment;
+    private static JLabel kucoinLabel;
     private static JComboBox<String> currencyValue;
     private static JComboBox<String> exchangeCombo;
     private static JComboBox<String> frequency;
@@ -144,12 +149,23 @@ public class CryptoUI
                     handler = new CryptopiaHandler().getTicker(this.market.getText(), currency, convertToUSD);
                     break;
                 }
+                case Constants.KUCOIN: {
+                    handler = new KucoinHandler().getTicker(this.market.getText(), currency, convertToUSD);
+                    break;
+                }
             }
         }
         return handler;
     }
 
     private void initComponents() {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        InputStream is = classLoader.getResourceAsStream("crypto/resources/Bitcoin.png");
+        try {
+            this.setIconImage(ImageIO.read(is));
+        } catch (IOException ex) {
+            Logger.getLogger(CryptoUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
         this.jScrollPane1 = new JScrollPane();
         watches = new JTable();
         this.jLabel1 = new JLabel();
@@ -186,6 +202,8 @@ public class CryptoUI
         tidexInvestment = new JLabel();
         cryptopiaLabel = new JLabel();
         cryptopiaInvestment = new JLabel();
+        kucoinLabel = new JLabel();
+        kucoinInvestment = new JLabel();
         this.donations = new JLabel();
         this.btcDonation = new JTextField();
         this.ethDonation = new JTextField();
@@ -254,7 +272,7 @@ public class CryptoUI
                 CryptoUI.this.frequencyActionPerformed(evt);
             }
         });
-        exchangeCombo.setModel(new DefaultComboBoxModel<String>(new String[]{Constants.BINANCE, Constants.BITTREX, Constants.GDAX, Constants.HITBTC, Constants.BITGRAIL, Constants.TIDEX, Constants.CRYPTOPIA}));
+        exchangeCombo.setModel(new DefaultComboBoxModel<String>(new String[]{Constants.BINANCE, Constants.BITTREX, Constants.GDAX, Constants.KUCOIN, Constants.HITBTC, Constants.BITGRAIL, Constants.TIDEX, Constants.CRYPTOPIA}));
         exchangeCombo.addActionListener(new ActionListener() {
 
             @Override
@@ -312,6 +330,7 @@ public class CryptoUI
         binanceLabel.setText("Binance:");
         hitbtcLabel.setText("HitBTC:");
         bitstampLabel.setText("Bitstamp:");
+        kucoinLabel.setText("Kucoin:");
         currencyValue.setModel(new DefaultComboBoxModel<String>(new String[]{Constants.USD, Constants.SATOSHI}));
         currencyValue.addActionListener(new ActionListener() {
 
@@ -323,7 +342,7 @@ public class CryptoUI
         bitGrailLabel.setText("BitGrail:");
         tidexLabel.setText("Tidex:");
         cryptopiaLabel.setText("Cryptopia:");
-        this.donations.setText("Donation Addresses");
+        this.donations.setText("Donations");
         this.btcDonation.setFont(new Font("Tahoma", 0, 10));
         this.btcDonation.setText("BTC: 1CSRCHfgDiThxZ33B1JziE8ayUAgxLvavJ");
         this.btcDonation.setEditable(false);
@@ -335,14 +354,22 @@ public class CryptoUI
         this.ltcDonation.setEditable(false);
         GroupLayout layout = new GroupLayout(this.getContentPane());
         this.getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addContainerGap().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(this.jLabel4).addComponent(this.jLabel2)).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup().addComponent(baseCurrencyCombo, -2, 91, -2).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addComponent(this.jLabel3).addGap(10, 10, 10).addComponent(this.market, -2, 74, -2)).addComponent(exchangeCombo, -2, 222, -2)).addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING).addGroup(layout.createSequentialGroup().addGap(18, 18, 18).addComponent(this.addToWatchList, -2, 159, -2).addGap(18, 18, 18).addComponent(InvalidBaseToMarket).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, -1, 32767).addComponent(totalPortfolioPrice, -2, 150, -2).addGap(54, 54, 54).addComponent(this.jButton1, -2, 144, -2)).addGroup(layout.createSequentialGroup().addGap(402, 402, 402).addComponent(currencyValue, -2, 103, -2).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, -1, 32767).addComponent(this.jLabel1).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addComponent(frequency, -2, 106, -2)))).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(this.jLabel5).addGroup(layout.createSequentialGroup().addGap(93, 93, 93).addComponent(this.quantityOwnedInput, -2, 91, -2))).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addComponent(this.jLabel6).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addComponent(purchasePrice, -2, 107, -2).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, -1, 32767).addComponent(this.refresh)))).addGroup(layout.createSequentialGroup().addComponent(this.jScrollPane1, -2, 1433, -2).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false).addComponent(gdaxLabel, -1, -1, 32767).addComponent(bittrexLabel, -1, -1, 32767).addComponent(binanceLabel, -1, -1, 32767).addComponent(hitbtcLabel, -1, -1, 32767).addComponent(bitstampLabel, -1, 54, 32767).addComponent(bitGrailLabel, -1, -1, 32767)).addComponent(tidexLabel).addComponent(cryptopiaLabel)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(gdaxInvestment, -1, -1, 32767).addComponent(bittrexInvestment, -1, -1, 32767).addComponent(binanceInvestment, -1, -1, 32767).addComponent(hitbtcInvestment, -1, -1, 32767).addComponent(bitstampInvestment, -1, -1, 32767).addComponent(bitGrailInvestment, -1, -1, 32767).addComponent(tidexInvestment, -1, -1, 32767).addComponent(cryptopiaInvestment, -1, -1, 32767).addGroup(layout.createSequentialGroup().addGap(28, 28, 28).addComponent(this.donations).addGap(0, 0, 32767)))).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(this.btcDonation).addComponent(this.ethDonation).addComponent(this.ltcDonation)).addGap(0, 0, 32767))))).addContainerGap()));
-        layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addContainerGap().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(frequency, -2, -1, -2).addComponent(this.jLabel1, -2, 28, -2)).addGap(7, 7, 7).addComponent(this.jButton1).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(this.refresh)).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(exchangeCombo, -2, -1, -2).addComponent(this.jLabel2).addComponent(currencyValue, -2, -1, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(this.jLabel3).addComponent(baseCurrencyCombo, -2, -1, -2).addComponent(this.jLabel4).addComponent(this.market, -2, -1, -2).addComponent(this.addToWatchList).addComponent(InvalidBaseToMarket).addComponent(totalPortfolioPrice)).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(this.jLabel5).addComponent(this.quantityOwnedInput, -2, -1, -2).addComponent(this.jLabel6).addComponent(purchasePrice, -2, -1, -2)))).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 49, 32767).addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(this.jScrollPane1, -1, 354, 32767).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(gdaxLabel, -2, 31, -2).addComponent(gdaxInvestment, -2, 31, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(bittrexLabel, -2, 26, -2).addComponent(bittrexInvestment, -2, 26, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(binanceLabel, -2, 23, -2).addComponent(binanceInvestment, -2, 23, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(hitbtcLabel, -2, 22, -2).addComponent(hitbtcInvestment, -2, 22, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(bitstampLabel, -2, 23, -2).addComponent(bitstampInvestment, -2, 23, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(bitGrailLabel).addComponent(bitGrailInvestment, -2, 22, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(tidexLabel).addComponent(tidexInvestment, -2, 22, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING).addComponent(cryptopiaLabel).addComponent(cryptopiaInvestment, -2, 14, -2)).addGap(37, 37, 37).addComponent(this.donations).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(this.btcDonation).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(this.ethDonation).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(this.ltcDonation).addGap(0, 21, 32767)))));
+        layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addContainerGap().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(this.jLabel4).addComponent(this.jLabel2)).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup().addComponent(baseCurrencyCombo, -2, 91, -2).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addComponent(this.jLabel3).addGap(10, 10, 10).addComponent(this.market, -2, 74, -2)).addComponent(exchangeCombo, -2, 222, -2)).addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING).addGroup(layout.createSequentialGroup().addGap(18, 18, 18).addComponent(this.addToWatchList, -2, 159, -2).addGap(18, 18, 18).addComponent(InvalidBaseToMarket).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, -1, 32767).addComponent(totalPortfolioPrice, -2, 150, -2).addGap(54, 54, 54).addComponent(this.jButton1, -2, 144, -2)).addGroup(layout.createSequentialGroup().addGap(402, 402, 402).addComponent(currencyValue, -2, 103, -2).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, -1, 32767).addComponent(this.jLabel1).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addComponent(frequency, -2, 106, -2)))).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(this.jLabel5).addGroup(layout.createSequentialGroup().addGap(93, 93, 93).addComponent(this.quantityOwnedInput, -2, 91, -2))).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addComponent(this.jLabel6).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addComponent(purchasePrice, -2, 107, -2).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, -1, 32767).addComponent(this.refresh)))).addGroup(layout.createSequentialGroup().addComponent(this.jScrollPane1, -2, 1433, -2).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false).addComponent(gdaxLabel, -1, -1, 32767).addComponent(bittrexLabel, -1, -1, 32767).addComponent(binanceLabel, -1, -1, 32767).addComponent(hitbtcLabel, -1, -1, 32767).addComponent(bitstampLabel, -1, 54, 32767).addComponent(bitGrailLabel, -1, -1, 32767)).addComponent(tidexLabel, -1, -1, 32767).addComponent(cryptopiaLabel, -1, -1, 32767).addComponent(kucoinLabel, -1, -1, 32767)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(gdaxInvestment, -1, -1, 32767).addComponent(bittrexInvestment, -1, -1, 32767).addComponent(binanceInvestment, -1, -1, 32767).addComponent(hitbtcInvestment, -1, -1, 32767).addComponent(bitstampInvestment, -1, -1, 32767).addComponent(bitGrailInvestment, -1, -1, 32767).addComponent(tidexInvestment, -1, -1, 32767).addComponent(cryptopiaInvestment, -1, -1, 32767).addComponent(kucoinInvestment, -1, -1, 32767).addGroup(layout.createSequentialGroup().addGap(28, 28, 28).addComponent(this.donations).addGap(0, 0, 32767)))).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(this.btcDonation).addComponent(this.ethDonation).addComponent(this.ltcDonation)).addGap(0, 0, 32767))))).addContainerGap()));
+        layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addContainerGap().addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(frequency, -2, -1, -2).addComponent(this.jLabel1, -2, 28, -2)).addGap(7, 7, 7).addComponent(this.jButton1).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(this.refresh)).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(exchangeCombo, -2, -1, -2).addComponent(this.jLabel2).addComponent(currencyValue, -2, -1, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(this.jLabel3).addComponent(baseCurrencyCombo, -2, -1, -2).addComponent(this.jLabel4).addComponent(this.market, -2, -1, -2).addComponent(this.addToWatchList).addComponent(InvalidBaseToMarket).addComponent(totalPortfolioPrice)).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(this.jLabel5).addComponent(this.quantityOwnedInput, -2, -1, -2).addComponent(this.jLabel6).addComponent(purchasePrice, -2, -1, -2)))).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 49, 32767).addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(this.jScrollPane1, -1, 354, 32767).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(gdaxLabel, -2, 22, -2).addComponent(gdaxInvestment, -2, 22, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(bittrexLabel, -2, 22, -2).addComponent(bittrexInvestment, -2, 22, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(binanceLabel, -2, 22, -2).addComponent(binanceInvestment, -2, 22, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(hitbtcLabel, -2, 22, -2).addComponent(hitbtcInvestment, -2, 22, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(bitstampLabel, -2, 22, -2).addComponent(bitstampInvestment, -2, 22, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(bitGrailLabel).addComponent(bitGrailInvestment, -2, 22, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(tidexLabel).addComponent(tidexInvestment, -2, 22, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING).addComponent(cryptopiaLabel).addComponent(cryptopiaInvestment, -2, 22, -2)).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING).addComponent(kucoinLabel).addComponent(kucoinInvestment, -2, 22, -2)).addGap(15, 15, 15).addComponent(this.donations).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(this.btcDonation).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(this.ethDonation).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(this.ltcDonation).addGap(0, 21, 32767)))));
         InvalidBaseToMarket.setVisible(false);
         gdaxLabel.setVisible(false);
         bittrexLabel.setVisible(false);
         binanceLabel.setVisible(false);
         hitbtcLabel.setVisible(false);
         bitstampLabel.setVisible(false);
+        tidexLabel.setVisible(false);
+        bitGrailLabel.setVisible(false);
+        cryptopiaLabel.setVisible(false);
+        kucoinLabel.setVisible(false);
+        kucoinInvestment.setVisible(false);
+        bitGrailInvestment.setVisible(false);
+        tidexInvestment.setVisible(false);
+        cryptopiaInvestment.setVisible(false);
         gdaxInvestment.setVisible(false);
         bittrexInvestment.setVisible(false);
         binanceInvestment.setVisible(false);
@@ -674,6 +701,7 @@ public class CryptoUI
                 exchangePrices.put(Constants.BITGRAIL, 0.0);
                 exchangePrices.put(Constants.TIDEX, 0.0);
                 exchangePrices.put(Constants.CRYPTOPIA, 0.0);
+                exchangePrices.put(Constants.KUCOIN, 0.0);
                 HashMap<String, Double> btcPrices = new HashMap<String, Double>();
                 btcPrices.put(Constants.BITTREX, 1.0);
                 btcPrices.put(Constants.BINANCE, 1.0);
@@ -683,6 +711,7 @@ public class CryptoUI
                 btcPrices.put(Constants.BITGRAIL, 1.0);
                 btcPrices.put(Constants.TIDEX, 1.0);
                 btcPrices.put(Constants.CRYPTOPIA, 1.0);
+                btcPrices.put(Constants.KUCOIN, 1.0);
                 for (row = 0; row < model.getRowCount(); ++row) {
                     TickerHandler handler = null;
                     TickerHandler btcHandler = null;
@@ -791,6 +820,14 @@ public class CryptoUI
                                                 break;
                                             }
                                             btcHandler = new CryptopiaHandler().getTicker(Constants.BTC, Constants.USDT, false);
+                                            break;
+                                        }
+                                        case Constants.KUCOIN: {
+                                            handler = new KucoinHandler().getTicker(market, satoshi ? Constants.BTC : baseCurrency, !satoshi);
+                                            if (!satoshi) {
+                                                break;
+                                            }
+                                            btcHandler = new KucoinHandler().getTicker(Constants.BTC, Constants.USDT, false);
                                             break;
                                         }
                                     }
@@ -1004,6 +1041,22 @@ public class CryptoUI
                                 break;
                             }
                             cryptopiaInvestment.setText(String.format("$%.2f", value));
+                            break;
+                        }
+                        case Constants.KUCOIN: {
+                            if (value == 0.0) {
+                                kucoinLabel.setVisible(false);
+                                kucoinInvestment.setVisible(false);
+                                break;
+                            }
+                            kucoinLabel.setVisible(true);
+                            kucoinInvestment.setVisible(true);
+                            if (satoshi) {
+                                btcValue = (Double) btcPrices.get(Constants.CRYPTOPIA);
+                                kucoinInvestment.setText(String.format("%d", value.intValue()));
+                                break;
+                            }
+                            kucoinInvestment.setText(String.format("$%.2f", value));
                             break;
                         }
                     }
